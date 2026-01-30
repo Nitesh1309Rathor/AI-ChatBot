@@ -13,7 +13,7 @@ export const ChatService = {
     return chat;
   },
 
-  async getAllChat(userId: string) {
+  async getAllChats(userId: string) {
     const chats = await ChatDao.findChatsByUser(userId);
 
     logger.info(`${LOG.CHAT_FETCH_SUCCESS} userId=${userId} count=${chats.length}`);

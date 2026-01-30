@@ -23,5 +23,7 @@ export type ChatsApiResponse = {
 };
 
 export type CreateChatApiResponse = {
-  data: ChatSession;
+  data: {
+    chat: ChatSession;
+  };
 };
