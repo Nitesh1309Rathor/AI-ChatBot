@@ -11,6 +11,6 @@ export const ChatApi = {
     const res = await apiFetch<CreateChatApiResponse>("/api/chats", {
       method: "POST",
     });
-    return res.data;
+    return res.data.chat;
   },
 };

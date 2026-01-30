@@ -10,7 +10,7 @@ export const ChatController = {
 
       return res.status(201).json({
         message: SUCCESS.CHAT_CREATED,
-        data: chat,
+        data: { chat },
       });
     } catch (error) {
       next(error);
@@ -20,7 +20,7 @@ export const ChatController = {
   async getAllChat(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.userId!;
-      const chats = await ChatService.getAllChat(userId);
+      const chats = await ChatService.getAllChats(userId);
 
       return res.status(200).json({
         message: SUCCESS.CHAT_FETCHED,
