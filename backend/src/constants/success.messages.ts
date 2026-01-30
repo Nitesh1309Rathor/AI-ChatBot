@@ -6,4 +6,5 @@ export const SUCCESS = {
   CHAT_FETCHED: "Chats fetched successfully",
 
   MESSAGE_SENT: "Message sent successfully",
+  MESSAGE_FETCHED: "Message fetched successfully",
 };
