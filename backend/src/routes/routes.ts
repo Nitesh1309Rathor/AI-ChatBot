@@ -10,6 +10,7 @@ export const ROUTES = {
   },
 
   MESSAGES: {
-    Send: "/:chatSessionId/message",
+    Send: "/:chatSessionId/messages",
+    GetByChat: "/:chatSessionId/messages",
   },
 };

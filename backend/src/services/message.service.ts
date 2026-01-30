@@ -43,4 +43,33 @@ export const MessageService = {
 
     return { message, aiMessage };
   },
+
+  async getMessages(userId: string, chatSessionId: string, limit = 20, cursor?: string) {
+    const chatSession = await ChatDao.findChatById(chatSessionId);
+
+    if (!chatSession) {
+      logger.warn(`${ERROR.CHAT_NOT_FOUND} chatId=${chatSessionId}`);
+      throw new Error(ERROR.CHAT_NOT_FOUND);
+    }
+
+    if (chatSession.userId !== userId) {
+      logger.warn(`${ERROR.UNAUTHORIZED} userId=${userId} chatId=${chatSessionId}`);
+      throw new Error(ERROR.UNAUTHORIZED);
+    }
+
+    const messages = await MessageDao.findMessagesByChatSessionIdPaginated(chatSessionId, limit, cursor);
+
+    const hasMore = messages.length > limit;
+    const slicedMessages = hasMore ? messages.slice(0, limit) : messages;
+
+    const nextCursor = hasMore ? slicedMessages[slicedMessages.length - 1].id : null;
+
+    logger.info(`${LOG.MESSAGES_FETCH_SUCCESS} userId=${userId} chatId=${chatSessionId} count=${slicedMessages.length}`);
+
+    return {
+      messages: slicedMessages,
+      nextCursor,
+      hasMore,
+    };
+  },
 };

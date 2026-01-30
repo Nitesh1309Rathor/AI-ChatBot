@@ -16,4 +16,17 @@ export const MessageController = {
       next(error);
     }
   },
+
+  async getMessages(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId!;
+      const chatSessionId = req.params.chatSessionId as string;
+      const { cursor, limit } = req.query;
+
+      const messages = await MessageService.getMessages(userId, chatSessionId, Number(limit) || 20, cursor as string | undefined);
+      return res.status(200).json({ message: SUCCESS.MESSAGE_FETCHED, data: { messages } });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

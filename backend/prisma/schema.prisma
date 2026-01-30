@@ -28,8 +28,10 @@ model ChatSession {
   title     String?
   createdAt DateTime   @default(now())
 
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
+
+  @@index([userId])
 }
 
 model Message {
@@ -39,7 +41,9 @@ model Message {
   content       String
   createdAt     DateTime    @default(now())
 
-  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+
+  @@index([chatSessionId])
 }
 
 enum MessageRole {
