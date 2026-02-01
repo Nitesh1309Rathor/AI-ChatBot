@@ -7,7 +7,7 @@ import { ERROR } from "../constants/error.messages";
 import { MessageRole } from "../../generated/prisma/client";
 
 export const MessageService = {
-  async sendMessage(userId: string, chatSessionId: string, content: string) {
+  async sendMessage(userId: string, chatSessionId: string, content: string, clientId: string) {
     const chatSession = await ChatDao.findChatById(chatSessionId);
 
     if (!chatSession || chatSession.userId !== userId) {
@@ -15,10 +15,12 @@ export const MessageService = {
       throw new Error(ERROR.CHAT_NOT_FOUND);
     }
 
+    // User Message storing in Message table.
     const message = await MessageDao.createMessage({
       chatSessionId,
       role: MessageRole.USER,
       content,
+      clientId,
     });
 
     logger.info(`${LOG.MESSAGE_USER_SAVED} userId=${userId} chatId=${chatSessionId}`);
@@ -33,6 +35,7 @@ export const MessageService = {
       throw new Error(ERROR.AI_FAILED);
     }
 
+    // AI response Message storing in Message table.
     const aiMessage = await MessageDao.createMessage({
       chatSessionId,
       role: MessageRole.ASSISTANT,
@@ -41,7 +44,7 @@ export const MessageService = {
 
     logger.info(`${LOG.AI_RESPONSE_SAVED} userId=${userId} chatId=${chatSessionId}`);
 
-    return { message, aiMessage };
+    return { userMessage: message, aiMessage };
   },
 
   async getMessages(userId: string, chatSessionId: string, limit = 20, cursor?: string) {

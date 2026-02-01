@@ -7,9 +7,9 @@ export const MessageController = {
     try {
       const userId = req.userId!;
       const chatSessionId = req.params.chatSessionId as string;
-      const { content } = req.body;
+      const { content, clientId } = req.body;
 
-      const result = await MessageService.sendMessage(userId, chatSessionId, content);
+      const result = await MessageService.sendMessage(userId, chatSessionId, content, clientId);
 
       return res.status(201).json({ message: SUCCESS.MESSAGE_SENT, data: result });
     } catch (error) {
@@ -23,8 +23,8 @@ export const MessageController = {
       const chatSessionId = req.params.chatSessionId as string;
       const { cursor, limit } = req.query;
 
-      const messages = await MessageService.getMessages(userId, chatSessionId, Number(limit) || 20, cursor as string | undefined);
-      return res.status(200).json({ message: SUCCESS.MESSAGE_FETCHED, data: { messages } });
+      const result = await MessageService.getMessages(userId, chatSessionId, Number(limit) || 20, cursor as string | undefined);
+      return res.status(200).json({ message: SUCCESS.MESSAGE_FETCHED, data: result });
     } catch (error) {
       next(error);
     }

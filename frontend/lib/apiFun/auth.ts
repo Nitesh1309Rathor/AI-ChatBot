@@ -1,5 +1,5 @@
 import { AuthResponse, LoginApiResponse } from "@/constants/types";
-import { apiFetch } from "./api";
+import { apiFetch } from "@/lib/api";
 
 export async function login(email: string, password: string) {
   return apiFetch<LoginApiResponse>("/api/auth/login", {

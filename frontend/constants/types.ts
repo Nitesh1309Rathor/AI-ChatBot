@@ -27,3 +27,27 @@ export type CreateChatApiResponse = {
     chat: ChatSession;
   };
 };
+
+export type Message = {
+  id: string;
+  clientId?: string;
+  chatSessionId: string;
+  role: "USER" | "ASSISTANT";
+  content: string;
+  createdAt: string;
+
+  optimistic?: boolean;
+};
+
+export type PaginatedMessagesResponse = {
+  messages: Message[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
+export type ChatMessagesProps = {
+  messages: Message[];
+  hasMore: boolean;
+  loading: boolean;
+  onLoadMore: () => void;
+};

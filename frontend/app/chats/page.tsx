@@ -6,13 +6,14 @@ import type { ChatSession } from "@/constants/types";
 import ChatsSidebar from "@/components/chatsSidebar";
 import { ThemeToggle } from "@/components/theme.toggle";
 import ChatMainPanel from "@/components/chatMainPanel";
-import { ChatApi } from "@/lib/chat";
+import { ChatApi } from "@/lib/apiFun/chat";
 
 export default function ChatsPage() {
   const [loading, setLoading] = useState(true);
   const [chats, setChats] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
+  // Loads the all chats of user in sidebar.
   useEffect(() => {
     async function loadChats() {
       try {
@@ -26,6 +27,7 @@ export default function ChatsPage() {
     loadChats();
   }, []);
 
+  // Handle the new chat create button in sidebar.
   async function handleCreateChat() {
     try {
       const chat = await ChatApi.createChat();
