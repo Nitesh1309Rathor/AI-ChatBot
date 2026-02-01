@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { register } from "@/lib/auth";
+import { register } from "@/lib/apiFun/auth";
 import { LOCAL_STORAGE } from "@/lib/auth.storage";
 
 export default function RegisterPage() {

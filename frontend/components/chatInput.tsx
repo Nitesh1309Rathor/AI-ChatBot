@@ -7,10 +7,17 @@ import { Send } from "lucide-react";
 
 type ChatInputProps = {
   disabled: boolean;
+  onSend?: (content: string) => void;
 };
 
-function ChatInput({ disabled }: ChatInputProps) {
+function ChatInput({ disabled, onSend }: ChatInputProps) {
   const [message, setMessage] = useState("");
+
+  function handleSend() {
+    if (!message.trim() || !onSend) return;
+    onSend(message.trim());
+    setMessage("");
+  }
 
   return (
     <div className="border-t p-4">
@@ -24,7 +31,7 @@ function ChatInput({ disabled }: ChatInputProps) {
           rows={2}
         />
 
-        <Button disabled={disabled || message.trim() === ""} className="self-end">
+        <Button disabled={disabled || message.trim() === ""} onClick={handleSend} className="self-end">
           <Send className="h-4 w-4" />
         </Button>
       </div>

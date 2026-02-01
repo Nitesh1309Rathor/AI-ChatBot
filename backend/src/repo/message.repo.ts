@@ -2,7 +2,7 @@ import { MessageRole } from "../../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
 
 export const MessageDao = {
-  async createMessage(data: { chatSessionId: string; role: MessageRole; content: string }) {
+  async createMessage(data: { chatSessionId: string; role: MessageRole; content: string; clientId?: string }) {
     return prisma.message.create({ data });
   },
 

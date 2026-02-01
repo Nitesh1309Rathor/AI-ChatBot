@@ -40,6 +40,7 @@ model Message {
   role          MessageRole
   content       String
   createdAt     DateTime    @default(now())
+  clientId      String? 
 
   chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 

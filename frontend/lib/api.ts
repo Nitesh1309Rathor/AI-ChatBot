@@ -3,8 +3,11 @@ import { LOCAL_STORAGE } from "./auth.storage";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  // Get the token from local storage.
   const token = LOCAL_STORAGE.getToken();
 
+  // If there is token in LS then attach in header otherwise NO.
+  // Login and register have no use of header as there is no token generated till now.
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {

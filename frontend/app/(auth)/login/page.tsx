@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { login } from "@/lib/auth";
+import { login } from "@/lib/apiFun/auth";
 import { LOCAL_STORAGE } from "@/lib/auth.storage";
 import Link from "next/link";
 import { useState } from "react";
