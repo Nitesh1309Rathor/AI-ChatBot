@@ -50,4 +50,5 @@ export type ChatMessagesProps = {
   hasMore: boolean;
   loading: boolean;
   onLoadMore: () => void;
+  onForceScroll?: (fn: () => void) => void;
 };

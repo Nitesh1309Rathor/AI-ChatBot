@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import ChatInput from "@/components/chatInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Message } from "@/constants/types";
 import { fetchMessages, sendMessage } from "@/lib/apiFun/messages";
 import ChatMessages from "./chatMessages";
@@ -20,6 +20,8 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [aiPending, setAiPending] = useState(false);
+  const messagesEndRef = useRef<(() => void) | null>(null);
 
   const hasActiveChat = Boolean(activeChatId);
 
@@ -66,7 +68,8 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
   // Handle new message send.
   // All the send messages goes to live messages.
   async function handleSendMessage(content: string) {
-    if (!activeChatId) return;
+    if (!activeChatId || aiPending) return;
+    setAiPending(true);
 
     const clientId = crypto.randomUUID();
 
@@ -80,19 +83,30 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
       optimistic: true,
     };
 
-    setLiveMessages((prev) => [...prev, optimisticMessage]);
+    const typingMessage: Message = {
+      id: `typing-${clientId}`,
+      chatSessionId: activeChatId,
+      role: "ASSISTANT",
+      content: "AI is Thinking...",
+      createdAt: new Date().toISOString(),
+      optimistic: true,
+    };
+
+    setLiveMessages((prev) => [...prev, optimisticMessage, typingMessage]);
 
     try {
       const res = await sendMessage(activeChatId, content, clientId);
 
       setLiveMessages((prev) => {
-        const withoutOptimistic = prev.filter((m) => m.clientId !== clientId);
+        const withoutOptimistic = prev.filter((m) => m.clientId !== clientId && !m.content.startsWith("AI is Thinking"));
 
         return [...withoutOptimistic, res.userMessage, res.aiMessage];
       });
+      setAiPending(false);
     } catch (err) {
-      setLiveMessages((prev) => prev.filter((m) => m.clientId !== clientId));
+      setLiveMessages((prev) => prev.filter((m) => m.clientId !== clientId && !m.content.startsWith("AI is Thinking")));
       console.error(err);
+      setAiPending(false);
     }
   }
 
@@ -108,7 +122,7 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
       {!hasActiveChat ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-3">
@@ -123,19 +137,31 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
           </div>
           <Separator />
 
-          {messages.length > 0 ? (
-            <ChatMessages messages={messages} hasMore={hasMore} loading={loading} onLoadMore={loadMoreMessages} />
-          ) : (
-            !loading && (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-muted-foreground">No messages yet. Start the conversation below.</p>
-              </div>
-            )
-          )}
+          <div className="flex-1 flex overflow-hidden">
+            {messages.length > 0 ? (
+              <ChatMessages
+                messages={messages}
+                hasMore={hasMore}
+                loading={loading}
+                onLoadMore={loadMoreMessages}
+                onForceScroll={(fn) => {
+                  messagesEndRef.current = fn;
+                }}
+              />
+            ) : (
+              !loading && (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-muted-foreground">No messages yet. Start the conversation below.</p>
+                </div>
+              )
+            )}
+          </div>
         </>
       )}
 
-      <ChatInput disabled={!hasActiveChat} onSend={handleSendMessage} />
+      <div className="shrink-0 border-t">
+        <ChatInput disabled={!hasActiveChat || aiPending} onSend={handleSendMessage} />
+      </div>
     </div>
   );
 }

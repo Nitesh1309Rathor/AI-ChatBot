@@ -47,8 +47,8 @@ export default function ChatsPage() {
   }
 
   return (
-    <div className="h-screen flex">
-      <aside className="w-72 border-r p-4">
+    <div className="h-screen flex overflow-hidden">
+      <aside className="w-72 border-r p-4 h-full overflow-hidden flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Chats</h2>
           <ThemeToggle />
@@ -57,7 +57,7 @@ export default function ChatsPage() {
         <ChatsSidebar chats={chats} activeChatId={activeChatId} onSelectChat={setActiveChatId} onCreate={handleCreateChat} />
       </aside>
 
-      <main className="flex-1 flex">
+      <main className="flex-1 flex h-full overflow-hidden">
         <ChatMainPanel activeChatId={activeChatId} />
       </main>
     </div>
