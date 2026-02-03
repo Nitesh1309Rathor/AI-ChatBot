@@ -3,13 +3,42 @@
 import { useEffect, useRef } from "react";
 import type { ChatMessagesProps } from "@/constants/types";
 
-export default function ChatMessages({ messages, hasMore, loading, onLoadMore }: ChatMessagesProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function ChatMessages({ messages, hasMore, loading, onLoadMore, onForceScroll }: ChatMessagesProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // controls whether auto-scroll is allowed
+  const shouldAutoScrollRef = useRef(true);
+  console.log("Ref: ", shouldAutoScrollRef);
+
+  // auto-scroll (only if user is near bottom)
+  useEffect(() => {
+    if (!shouldAutoScrollRef.current) return;
+
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
+
+  // expose FORCE scroll to parent (on user send)
+  useEffect(() => {
+    if (!onForceScroll) return;
+
+    onForceScroll(() => {
+      shouldAutoScrollRef.current = true;
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
+  }, [onForceScroll]);
 
   function handleScroll() {
-    if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    if (containerRef.current.scrollTop === 0 && hasMore && !loading) {
+    // detect if user is near bottom
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+
+    shouldAutoScrollRef.current = isNearBottom;
+
+    // pagination trigger
+    if (el.scrollTop === 0 && hasMore && !loading) {
       onLoadMore();
     }
   }
@@ -26,6 +55,8 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore }:
           {msg.content}
         </div>
       ))}
+
+      <div ref={bottomRef} />
     </div>
   );
 }
