@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import ChatInput from "@/components/chatInput";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "@/constants/types";
-import { fetchMessages, sendMessage } from "@/lib/apiFun/messages";
+import { fetchMessages, streamMessage } from "@/lib/apiFun/messages";
 import ChatMessages from "./chatMessages";
 import { Spinner } from "./ui/spinner";
 
@@ -14,23 +14,23 @@ type ChatMainPanelProps = {
 
 function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
   const [historyMessages, setHistoryMessages] = useState<Message[]>([]);
-
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
-
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [aiPending, setAiPending] = useState(false);
-  const messagesEndRef = useRef<(() => void) | null>(null);
 
+  const messagesEndRef = useRef<(() => void) | null>(null);
   const hasActiveChat = Boolean(activeChatId);
 
-  // Load Previous Messages.
+  // -----------------------------
+  // Load messages when chat changes
+  // -----------------------------
   useEffect(() => {
     if (!activeChatId) return;
 
     setHistoryMessages([]);
-    setLiveMessages([]);
+    setLiveMessages([]); // 🔴 CHANGE: always reset live messages
     setCursor(null);
     setHasMore(true);
 
@@ -41,7 +41,6 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
     setLoading(true);
 
     const data = await fetchMessages(chatId);
-    console.log(data);
 
     setHistoryMessages(data.messages);
     setCursor(data.nextCursor);
@@ -50,7 +49,6 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
     setLoading(false);
   }
 
-  // Load prev messages on scroll.
   async function loadMoreMessages() {
     if (!activeChatId || !hasMore || loading) return;
 
@@ -65,52 +63,70 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
     setLoading(false);
   }
 
-  // Handle new message send.
-  // All the send messages goes to live messages.
+  // -----------------------------
+  // SEND + STREAM MESSAGE
+  // -----------------------------
   async function handleSendMessage(content: string) {
     if (!activeChatId || aiPending) return;
     setAiPending(true);
 
     const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
 
-    const optimisticMessage: Message = {
+    const userMessage: Message = {
       id: clientId,
       clientId,
       chatSessionId: activeChatId,
       role: "USER",
       content,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       optimistic: true,
     };
 
-    const typingMessage: Message = {
-      id: `typing-${clientId}`,
+    const aiMessageId = `ai-${clientId}`;
+
+    const aiMessage: Message = {
+      id: aiMessageId,
       chatSessionId: activeChatId,
       role: "ASSISTANT",
-      content: "AI is Thinking...",
-      createdAt: new Date().toISOString(),
+      content: "",
+      createdAt: now,
       optimistic: true,
     };
 
-    setLiveMessages((prev) => [...prev, optimisticMessage, typingMessage]);
+    // 🔴 CHANGE: add ONLY one AI message for streaming
+    setLiveMessages((prev) => [...prev, userMessage, aiMessage]);
 
     try {
-      const res = await sendMessage(activeChatId, content, clientId);
+      await streamMessage({
+        chatSessionId: activeChatId,
+        content,
 
-      setLiveMessages((prev) => {
-        const withoutOptimistic = prev.filter((m) => m.clientId !== clientId && !m.content.startsWith("AI is Thinking"));
+        // 🔴 CHANGE: stream tokens into the SAME AI message
+        onToken(chunk) {
+          setLiveMessages((prev) => prev.map((m) => (m.id === aiMessageId ? { ...m, content: m.content + chunk } : m)));
+        },
 
-        return [...withoutOptimistic, res.userMessage, res.aiMessage];
+        onDone() {
+          setAiPending(false);
+        },
+
+        onError(err) {
+          console.error(err);
+          setAiPending(false);
+          setLiveMessages([]); // safety cleanup
+        },
       });
-      setAiPending(false);
     } catch (err) {
-      setLiveMessages((prev) => prev.filter((m) => m.clientId !== clientId && !m.content.startsWith("AI is Thinking")));
       console.error(err);
       setAiPending(false);
+      setLiveMessages([]);
     }
   }
 
-  // Combine the History of db messages and this current session messages from live messages.
+  // -----------------------------
+  // FINAL MESSAGE LIST
+  // -----------------------------
   const messages = [...historyMessages, ...liveMessages];
 
   if (loading && messages.length === 0) {

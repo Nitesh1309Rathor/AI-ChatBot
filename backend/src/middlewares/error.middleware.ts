@@ -18,6 +18,10 @@ export function errorMiddleware(err: Error, _req: Request, res: Response, _next:
     message = err.message;
   }
 
+  if (res.headersSent) {
+    return res.end();
+  }
+
   res.status(statusCode).json({
     message,
   });

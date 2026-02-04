@@ -1,51 +1,52 @@
 import { ChatDao } from "../repo/chat.repo";
 import { MessageDao } from "../repo/message.repo";
-import { callAI } from "../utils/callAI";
 import logger from "../utils/logger";
 import { LOG } from "../constants/log.messages";
 import { ERROR } from "../constants/error.messages";
 import { MessageRole } from "../../generated/prisma/client";
+import { Response } from "express";
+import { streamAIResponse } from "../utils/ai";
 
 export const MessageService = {
-  async sendMessage(userId: string, chatSessionId: string, content: string, clientId: string) {
-    const chatSession = await ChatDao.findChatById(chatSessionId);
+  // async sendMessage(userId: string, chatSessionId: string, content: string, clientId: string) {
+  //   const chatSession = await ChatDao.findChatById(chatSessionId);
 
-    if (!chatSession || chatSession.userId !== userId) {
-      logger.warn(`${LOG.CHAT_CREATE_FAILED} userId=${userId} chatId=${chatSessionId}`);
-      throw new Error(ERROR.CHAT_NOT_FOUND);
-    }
+  //   if (!chatSession || chatSession.userId !== userId) {
+  //     logger.warn(`${LOG.CHAT_CREATE_FAILED} userId=${userId} chatId=${chatSessionId}`);
+  //     throw new Error(ERROR.CHAT_NOT_FOUND);
+  //   }
 
-    // User Message storing in Message table.
-    const message = await MessageDao.createMessage({
-      chatSessionId,
-      role: MessageRole.USER,
-      content,
-      clientId,
-    });
+  //   // User Message storing in Message table.
+  //   const message = await MessageDao.createMessage({
+  //     chatSessionId,
+  //     role: MessageRole.USER,
+  //     content,
+  //     clientId,
+  //   });
 
-    logger.info(`${LOG.MESSAGE_USER_SAVED} userId=${userId} chatId=${chatSessionId}`);
+  //   logger.info(`${LOG.MESSAGE_USER_SAVED} userId=${userId} chatId=${chatSessionId}`);
 
-    logger.info(`${LOG.AI_REQUEST_STARTED} userId=${userId} chatId=${chatSessionId}`);
+  //   logger.info(`${LOG.AI_REQUEST_STARTED} userId=${userId} chatId=${chatSessionId}`);
 
-    let aiResponse: string;
-    try {
-      aiResponse = await callAI(content);
-    } catch (err) {
-      logger.error(`${LOG.AI_RESPONSE_FAILED} userId=${userId} chatId=${chatSessionId}`, { error: (err as Error).message });
-      throw new Error(ERROR.AI_FAILED);
-    }
+  //   let aiResponse: string;
+  //   try {
+  //     aiResponse = await callAI(content);
+  //   } catch (err) {
+  //     logger.error(`${LOG.AI_RESPONSE_FAILED} userId=${userId} chatId=${chatSessionId}`, { error: (err as Error).message });
+  //     throw new Error(ERROR.AI_FAILED);
+  //   }
 
-    // AI response Message storing in Message table.
-    const aiMessage = await MessageDao.createMessage({
-      chatSessionId,
-      role: MessageRole.ASSISTANT,
-      content: aiResponse,
-    });
+  //   // AI response Message storing in Message table.
+  //   const aiMessage = await MessageDao.createMessage({
+  //     chatSessionId,
+  //     role: MessageRole.ASSISTANT,
+  //     content: aiResponse,
+  //   });
 
-    logger.info(`${LOG.AI_RESPONSE_SAVED} userId=${userId} chatId=${chatSessionId}`);
+  //   logger.info(`${LOG.AI_RESPONSE_SAVED} userId=${userId} chatId=${chatSessionId}`);
 
-    return { userMessage: message, aiMessage };
-  },
+  //   return { userMessage: message, aiMessage };
+  // },
 
   async getMessages(userId: string, chatSessionId: string, limit = 20, cursor?: string) {
     const chatSession = await ChatDao.findChatById(chatSessionId);
@@ -74,5 +75,64 @@ export const MessageService = {
       nextCursor,
       hasMore,
     };
+  },
+
+  async streamMessageService(userId: string, chatSessionId: string, content: string, res: Response) {
+    logger.info("AI response generation started", {
+      category: "MESSAGE",
+      chatSessionId,
+    });
+
+    // Ownership check
+    const chat = await ChatDao.findChatById(chatSessionId);
+    if (!chat || chat.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Save USER message
+    const userMessage = await MessageDao.createMessage({
+      chatSessionId,
+      role: "USER",
+      content,
+    });
+
+    // Send metadata
+    res.write(`event: meta\ndata: ${JSON.stringify({ userMessage })}\n\n`);
+
+    let fullAIResponse = "";
+
+    // Stream Gemini tokens
+    try {
+      logger.info("Calling Gemini stream", {
+        category: "MESSAGE",
+        prompt: content,
+      });
+
+      await streamAIResponse(content, {
+        onToken(token) {
+          fullAIResponse += token;
+          res.write(`data: ${token}\n\n`);
+        },
+
+        async onComplete() {
+          const aiMessage = await MessageDao.createMessage({
+            chatSessionId,
+            role: "ASSISTANT",
+            content: fullAIResponse,
+          });
+
+          res.write(`event: done\ndata: ${JSON.stringify({ aiMessage })}\n\n`);
+          res.end();
+        },
+      });
+    } catch (err) {
+      logger.error("AI response generation failed", {
+        category: "MESSAGE",
+        err,
+      });
+
+      res.write(`event: error\ndata: AI streaming failed\n\n`);
+      res.end();
+    }
   },
 };

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import type { ChatMessagesProps } from "@/constants/types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function ChatMessages({ messages, hasMore, loading, onLoadMore, onForceScroll }: ChatMessagesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -9,14 +11,17 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
 
   // controls whether auto-scroll is allowed
   const shouldAutoScrollRef = useRef(true);
-  console.log("Ref: ", shouldAutoScrollRef);
 
   // auto-scroll (only if user is near bottom)
   useEffect(() => {
     if (!shouldAutoScrollRef.current) return;
 
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+    // only scroll if last message is assistant OR new message added
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== "ASSISTANT") return;
+
+    bottomRef.current?.scrollIntoView({ behavior: "auto" });
+  }, [messages]);
 
   // expose FORCE scroll to parent (on user send)
   useEffect(() => {
@@ -24,9 +29,9 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
 
     onForceScroll(() => {
       shouldAutoScrollRef.current = true;
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current?.scrollIntoView({ behavior: "auto" });
     });
-  }, [onForceScroll]);
+  }, []);
 
   function handleScroll() {
     const el = containerRef.current;
@@ -50,9 +55,17 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
       {messages.filter(Boolean).map((msg) => (
         <div
           key={msg.clientId ?? msg.id}
-          className={`max-w-[70%] rounded-lg px-4 py-2 text-sm ${msg.role === "USER" ? "ml-auto bg-primary text-primary-foreground" : "mr-auto bg-muted"}`}
+          className={`
+    group relative max-w-[75%] px-4 py-3 text-sm leading-relaxed
+    rounded-2xl transition-all
+    ${
+      msg.role === "USER"
+        ? "ml-auto bg-linear-to-br from-primary to-primary/80 text-primary-foreground shadow-md"
+        : "mr-auto bg-zinc-800/90 text-zinc-100 shadow-sm"
+    }
+  `}
         >
-          {msg.content}
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
         </div>
       ))}
 

@@ -12,5 +12,6 @@ export const ROUTES = {
   MESSAGES: {
     Send: "/:chatSessionId/messages",
     GetByChat: "/:chatSessionId/messages",
+    GetAIResponse: "/:chatSessionId/messages/stream",
   },
 };
