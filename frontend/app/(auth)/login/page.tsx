@@ -19,10 +19,10 @@ export default function LoginPage() {
       setError(null);
 
       // Login call to backend and it return token.
-      const token = await login(email, password);
+      const response = await login(email, password);
 
       // Store the token in local storage.
-      LOCAL_STORAGE.setToken(token.data.token);
+      LOCAL_STORAGE.setToken(response.data.token);
       window.location.href = "/dashboard";
 
       setEmail("");
@@ -38,12 +38,12 @@ export default function LoginPage() {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input id="email" type="email" placeholder="your_email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input id="password" type="password" value={password} placeholder="*********" onChange={(e) => setPassword(e.target.value)} />
       </div>
 
       <Button className="w-full" onClick={handleLogin} disabled={loading}>

@@ -56,16 +56,21 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
         <div
           key={msg.clientId ?? msg.id}
           className={`
-    group relative max-w-[75%] px-4 py-3 text-sm leading-relaxed
-    rounded-2xl transition-all
-    ${
-      msg.role === "USER"
-        ? "ml-auto bg-linear-to-br from-primary to-primary/80 text-primary-foreground shadow-md"
-        : "mr-auto bg-zinc-800/90 text-zinc-100 shadow-sm"
-    }
-  `}
+  group relative max-w-[72%]
+  px-5 py-3
+  text-[16px] leading-8 
+  rounded-xl transition-all
+  animate-in fade-in slide-in-from-bottom-1
+  ${msg.role === "USER" ? "ml-auto bg-zinc-800  from-primary to-primary/80 text-primary-foreground shadow-md" : "mr-auto bg-zinc-900/60 text-zinc-100 shadow-sm"}
+`}
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+          <div className="prose prose-invert prose-sm max-w-none">
+            {msg.role === "ASSISTANT" && msg.content === "" ? (
+              <span className="italic text-muted-foreground">Thinking…</span>
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+            )}
+          </div>
         </div>
       ))}
 

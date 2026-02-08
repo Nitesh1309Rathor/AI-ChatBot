@@ -2,6 +2,7 @@ import type { ChatSession } from "@/constants/types";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import AnimatedChatTitle from "./AnimatedTitle";
 
 type ChatsSidebarProps = {
   chats?: ChatSession[];
@@ -12,8 +13,7 @@ type ChatsSidebarProps = {
 
 function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate }: ChatsSidebarProps) {
   return (
-    <div className="h-full p-4 flex flex-col">
-      {/* New Chat */}
+    <div className="h-full py-4 flex flex-col">
       <Button variant="outline" className="mb-4 justify-start" onClick={onCreate}>
         + New chat
       </Button>
@@ -26,14 +26,21 @@ function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate }: Chat
           <div className="space-y-1">
             {chats.map((chat) => {
               const isActive = chat.id === activeChatId;
+              const shouldAnimate = !!(chat.title && chat.title !== "New conversation" && chat.id === activeChatId);
 
               return (
                 <button
                   key={chat.id}
                   onClick={() => onSelectChat(chat.id)}
-                  className={cn("w-full rounded-md px-3 py-2 text-left text-sm transition-colors", "hover:bg-muted", isActive && "bg-muted font-medium")}
+                  className={cn(
+                    "w-full rounded-md px-3 py-2 text-left transition-colors",
+                    "hover:bg-muted/70",
+                    isActive ? "bg-muted font-semibold text-foreground" : "text-muted-foreground",
+                  )}
                 >
-                  {chat.title ?? "New conversation"}
+                  <span className="block truncate">
+                    <AnimatedChatTitle text={chat.title ?? "New conversation"} animate={shouldAnimate} />
+                  </span>
                 </button>
               );
             })}

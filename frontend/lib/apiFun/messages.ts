@@ -20,34 +20,24 @@ export async function fetchMessages(chatSessionId: string, cursor?: string, limi
   return response.data;
 }
 
-export async function sendMessage(chatSessionId: string, content: string, clientId: string): Promise<{ userMessage: Message; aiMessage: Message }> {
-  return apiFetch<{
-    message: string;
-    data: {
-      userMessage: Message;
-      aiMessage: Message;
-    };
-  }>(`/api/chats/${chatSessionId}/messages`, {
-    method: "POST",
-    body: JSON.stringify({ content, clientId }),
-  }).then((res) => res.data);
-}
-
 export async function streamMessage({
   chatSessionId,
   content,
   onToken,
+  onMeta,
   onDone,
   onError,
 }: {
   chatSessionId: string;
   content: string;
   onToken: (chunk: string) => void;
+  onMeta?: (meta: { chatSessionId: string; chatTitle?: string; userMessage?: Message }) => void;
   onDone: () => void;
   onError: (err: unknown) => void;
 }) {
   try {
     const token = LOCAL_STORAGE.getToken();
+
     const res = await fetch(`${API_BASE_URL}/api/chats/${chatSessionId}/messages/stream`, {
       method: "POST",
       headers: {
@@ -72,13 +62,24 @@ export async function streamMessage({
 
       buffer += decoder.decode(value, { stream: true });
 
-      const lines = buffer.split("\n\n");
-      buffer = lines.pop() || "";
+      const events = buffer.split("\n\n");
+      buffer = events.pop() || "";
 
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const chunk = line.replace("data: ", "");
-          onToken(chunk);
+      for (const event of events) {
+        // META EVENT
+        if (event.startsWith("event: meta")) {
+          const dataLine = event.split("\n").find((l) => l.startsWith("data: "));
+
+          if (dataLine) {
+            const meta = JSON.parse(dataLine.replace("data: ", ""));
+            onMeta?.(meta);
+          }
+          continue;
+        }
+
+        // TOKEN EVENT
+        if (event.startsWith("data: ")) {
+          onToken(event.replace("data: ", ""));
         }
       }
     }

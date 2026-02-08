@@ -19,6 +19,7 @@ export default function RegisterPage() {
       setLoading(true);
       setError(null);
 
+      // Return token.
       const data = await register(email, password);
 
       LOCAL_STORAGE.setToken(data.token);
@@ -34,12 +35,12 @@ export default function RegisterPage() {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input id="email" type="email" value={email} placeholder="Enter Email..." onChange={(e) => setEmail(e.target.value)} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Input id="password" type="password" value={password} placeholder="Enter Password..." onChange={(e) => setPassword(e.target.value)} />
       </div>
 
       {error && (
@@ -48,7 +49,7 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <Button className="w-full" onClick={handleRegister} disabled={loading}>
+      <Button className="w-full cursor-pointer" onClick={handleRegister} disabled={loading}>
         {loading ? "Creating account..." : "Register"}
       </Button>
 

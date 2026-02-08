@@ -7,12 +7,15 @@ import { Message } from "@/constants/types";
 import { fetchMessages, streamMessage } from "@/lib/apiFun/messages";
 import ChatMessages from "./chatMessages";
 import { Spinner } from "./ui/spinner";
+import { useChats } from "@/context/ChatContext";
+import { generateChatTitle } from "@/lib/generateTitle";
 
 type ChatMainPanelProps = {
   activeChatId: string | null;
+  createLoading: boolean;
 };
 
-function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
+function ChatMainPanel({ activeChatId, createLoading }: ChatMainPanelProps) {
   const [historyMessages, setHistoryMessages] = useState<Message[]>([]);
   const [liveMessages, setLiveMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,14 +26,14 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
   const messagesEndRef = useRef<(() => void) | null>(null);
   const hasActiveChat = Boolean(activeChatId);
 
-  // -----------------------------
+  const { chats, updateChatTitle } = useChats();
+
   // Load messages when chat changes
-  // -----------------------------
   useEffect(() => {
     if (!activeChatId) return;
 
     setHistoryMessages([]);
-    setLiveMessages([]); // 🔴 CHANGE: always reset live messages
+    setLiveMessages([]); // always reset live messages
     setCursor(null);
     setHasMore(true);
 
@@ -63,12 +66,17 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
     setLoading(false);
   }
 
-  // -----------------------------
   // SEND + STREAM MESSAGE
-  // -----------------------------
   async function handleSendMessage(content: string) {
     if (!activeChatId || aiPending) return;
     setAiPending(true);
+
+    const isFirstMsg = historyMessages.length == 0 && liveMessages.length == 0;
+
+    if (isFirstMsg) {
+      const title = generateChatTitle(content);
+      updateChatTitle(activeChatId, title);
+    }
 
     const clientId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -94,7 +102,7 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
       optimistic: true,
     };
 
-    // 🔴 CHANGE: add ONLY one AI message for streaming
+    // add ONLY one AI message for streaming
     setLiveMessages((prev) => [...prev, userMessage, aiMessage]);
 
     try {
@@ -102,7 +110,7 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
         chatSessionId: activeChatId,
         content,
 
-        // 🔴 CHANGE: stream tokens into the SAME AI message
+        // stream tokens into the SAME AI message
         onToken(chunk) {
           setLiveMessages((prev) => prev.map((m) => (m.id === aiMessageId ? { ...m, content: m.content + chunk } : m)));
         },
@@ -124,14 +132,12 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
     }
   }
 
-  // -----------------------------
   // FINAL MESSAGE LIST
-  // -----------------------------
   const messages = [...historyMessages, ...liveMessages];
 
   if (loading && messages.length === 0) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen w-screen flex items-center justify-center">
         <Spinner />
       </div>
     );
@@ -148,8 +154,8 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
         </div>
       ) : (
         <>
-          <div className="px-6 py-4">
-            <h2 className="text-lg font-semibold">Conversation</h2>
+          <div className="px-6 py-4 bg-sidebar-header">
+            <h2 className="text-lg font-semibold">Helping Hand</h2>
           </div>
           <Separator />
 
@@ -166,7 +172,7 @@ function ChatMainPanel({ activeChatId }: ChatMainPanelProps) {
               />
             ) : (
               !loading && (
-                <div className="flex h-full items-center justify-center">
+                <div className="flex h-full w-full items-center justify-center ">
                   <p className="text-muted-foreground">No messages yet. Start the conversation below.</p>
                 </div>
               )
