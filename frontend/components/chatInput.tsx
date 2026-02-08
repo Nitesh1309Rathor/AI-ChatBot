@@ -20,20 +20,47 @@ function ChatInput({ disabled, onSend }: ChatInputProps) {
   }
 
   return (
-    <div className="border-t p-4">
-      <div className="flex gap-2">
+    <div className="p-4">
+      <div className="flex gap-2 items-center">
         <Textarea
-          placeholder={disabled ? "Select a chat to start typing..." : "Type your message..."}
+          placeholder={disabled ? "Select a chat to start typing…" : "Type your message…"}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           disabled={disabled}
-          className="resize-none"
           rows={2}
+          className="
+  resize-none
+  rounded-md
+  border
+  bg-transparent
+  px-3
+  py-2
+  text-sm
+  leading-6
+  placeholder:text-muted-foreground
+  focus-visible:ring-1
+  focus-visible:ring-ring
+  focus-visible:ring-offset-0
+  mr-5
+"
         />
 
-        <Button disabled={disabled || message.trim() === ""} onClick={handleSend} className="self-end">
-          <Send className="h-4 w-4" />
-        </Button>
+        <button
+          onClick={handleSend}
+          disabled={disabled || message.trim() === ""}
+          className="
+    h-14 w-14
+    rounded-xl
+    bg-zinc-700
+    text-primary-foreground
+    flex items-center justify-center
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+    cursor-pointer
+  "
+        >
+          <Send size={24} className="text-zinc-100" />
+        </button>
       </div>
     </div>
   );

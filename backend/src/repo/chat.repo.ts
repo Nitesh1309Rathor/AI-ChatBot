@@ -14,4 +14,11 @@ export const ChatDao = {
   async findChatById(chatSessionId: string) {
     return prisma.chatSession.findUnique({ where: { id: chatSessionId } });
   },
+
+  async updateChatTitle(chatSessionId: string, title: string) {
+    return prisma.chatSession.update({
+      where: { id: chatSessionId },
+      data: { title },
+    });
+  },
 };

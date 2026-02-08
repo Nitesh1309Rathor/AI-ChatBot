@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   function handleLogout() {
     LOCAL_STORAGE.removeToken();
-    window.location.href = "/login";
+    router.replace("/login");
   }
 
   return (
