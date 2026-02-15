@@ -10,11 +10,27 @@ import { ChatApi } from "@/lib/apiFun/chat";
 import { useChats } from "@/context/ChatContext";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth.guard";
+import { Button } from "@/components/ui/button";
+import { LOCAL_STORAGE } from "@/lib/auth.storage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Menu } from "lucide-react";
 
 export default function ChatsPage() {
   const router = useRouter();
   const [pageLoading, setPageLoading] = useState(true);
   const [createLoading, setCreateLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const { chats, setChats } = useChats();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
@@ -27,29 +43,30 @@ export default function ChatsPage() {
     async function loadChats() {
       try {
         const chats = await ChatApi.getChats();
-        console.log("Chats from API:", chats, Array.isArray(chats));
         setChats(chats);
       } finally {
         setPageLoading(false);
       }
     }
+
     loadChats();
   }, [router]);
 
-  // Loads the all chats of user in sidebar.
-
-  // Handle the new chat create button in sidebar.
   async function handleCreateChat() {
     try {
       setCreateLoading(true);
       const chat = await ChatApi.createChat();
       setChats((prev) => [chat, ...prev]);
       setActiveChatId(chat.id);
-    } catch {
-      console.error("Failed to create chat");
+      setSidebarOpen(false);
     } finally {
       setCreateLoading(false);
     }
+  }
+
+  function handleLogout() {
+    LOCAL_STORAGE.removeToken();
+    router.replace("/login");
   }
 
   if (pageLoading) {
@@ -61,18 +78,83 @@ export default function ChatsPage() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden">
-      <aside className="w-72 border-r p-4 h-full overflow-hidden flex flex-col bg-sidebar">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">Chats</h2>
+    <div className="h-screen flex overflow-hidden bg-background">
+      {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed md:static z-50
+          h-full
+          w-64 md:w-72 lg:w-80
+          bg-card border-r border-border
+          p-4
+          flex flex-col
+          transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0
+        `}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-semibold text-lg">Chats</h2>
           <ThemeToggle />
         </div>
 
-        <ChatsSidebar chats={chats} activeChatId={activeChatId} onSelectChat={setActiveChatId} onCreate={handleCreateChat} />
+        <ChatsSidebar
+          chats={chats}
+          activeChatId={activeChatId}
+          onSelectChat={(id) => {
+            setActiveChatId(id);
+            setSidebarOpen(false);
+          }}
+          onCreate={handleCreateChat}
+          createLoading={createLoading}
+        />
       </aside>
 
-      <main className="flex-1 flex h-full overflow-hidden">
-        <ChatMainPanel activeChatId={activeChatId} createLoading={createLoading} />
+      {/* Main Section */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Header */}
+        <div className="h-14 border-b border-border flex items-center justify-between px-4 shrink-0 bg-card">
+          {/* Left Section */}
+          <div className="flex items-center gap-3">
+            <button className="md:hidden" onClick={() => setSidebarOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </button>
+
+            <a href="/">
+              <h3 className="font-semibold text-base sm:text-lg cursor-pointer">Helping Hand</h3>
+            </a>
+          </div>
+
+          {/* Right Section */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" className="text-red-500 hover:bg-red-500/10 cursor-pointer">
+                Logout
+              </Button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                <AlertDialogDescription>Are you sure you want to log out of your account?</AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-destructive text-destructive-foreground" onClick={handleLogout}>
+                  Logout
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
+        {/* Chat Area */}
+        <div className="flex-1 overflow-hidden">
+          <ChatMainPanel activeChatId={activeChatId} createLoading={createLoading} />
+        </div>
       </main>
     </div>
   );

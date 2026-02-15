@@ -6,7 +6,7 @@ import { signToken } from "../utils/jwt";
 import logger from "../utils/logger";
 
 export const AuthService = {
-  async register(email: string, password: string) {
+  async register(name: string, email: string, password: string) {
     logger.info(LOG.AUTH_REGISTER_START);
 
     const existingUser = await AuthDao.findByEmail(email);
@@ -16,7 +16,7 @@ export const AuthService = {
     }
 
     const hashedPassword = await hashPassword(password);
-    const user = await AuthDao.createUser(email, hashedPassword);
+    const user = await AuthDao.createUser(name, email, hashedPassword);
 
     logger.info(LOG.AUTH_REGISTER_SUCCESS);
 
@@ -24,6 +24,7 @@ export const AuthService = {
       token: signToken({ userId: user.id }),
     };
   },
+
   async login(email: string, password: string) {
     logger.info(LOG.AUTH_LOGIN_START);
 

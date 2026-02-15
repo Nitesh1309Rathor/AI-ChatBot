@@ -15,7 +15,7 @@ export function ThemeToggle() {
   if (!mounted) return null;
 
   return (
-    <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+    <Button className="cursor-pointer" variant="ghost" size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
       {theme === "dark" ? "🌞 Light" : "🌙 Dark"}
     </Button>
   );
