@@ -5,8 +5,8 @@ import { SUCCESS } from "../constants/success.messages";
 export const AuthController = {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
-      const result = await AuthService.register(email, password);
+      const { name, email, password } = req.body;
+      const result = await AuthService.register(name, email, password);
       res.status(201).json({
         message: SUCCESS.USER_REGISTERED,
         data: result,

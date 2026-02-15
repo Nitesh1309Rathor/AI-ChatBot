@@ -137,51 +137,37 @@ function ChatMainPanel({ activeChatId, createLoading }: ChatMainPanelProps) {
 
   if (loading && messages.length === 0) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
-      {!hasActiveChat ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-3">
-            <h1 className="text-3xl font-semibold">Hi, how can I help you?</h1>
-            <p className="text-muted-foreground">Start a new chat or select one from the left.</p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="px-6 py-4 bg-sidebar-header">
-            <h2 className="text-lg font-semibold">Helping Hand</h2>
-          </div>
-          <Separator />
+    <div className="relative flex h-full flex-col">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto pb-32  mb-2">
+        {messages.length > 0 ? (
+          <ChatMessages
+            messages={messages}
+            hasMore={hasMore}
+            loading={loading}
+            onLoadMore={loadMoreMessages}
+            onForceScroll={(fn) => {
+              messagesEndRef.current = fn;
+            }}
+          />
+        ) : (
+          !loading && (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-muted-foreground">No messages yet. Start the conversation below.</p>
+            </div>
+          )
+        )}
+      </div>
 
-          <div className="flex-1 flex overflow-hidden">
-            {messages.length > 0 ? (
-              <ChatMessages
-                messages={messages}
-                hasMore={hasMore}
-                loading={loading}
-                onLoadMore={loadMoreMessages}
-                onForceScroll={(fn) => {
-                  messagesEndRef.current = fn;
-                }}
-              />
-            ) : (
-              !loading && (
-                <div className="flex h-full w-full items-center justify-center ">
-                  <p className="text-muted-foreground">No messages yet. Start the conversation below.</p>
-                </div>
-              )
-            )}
-          </div>
-        </>
-      )}
-
-      <div className="shrink-0 border-t">
+      {/* Floating Input */}
+      <div className="absolute bottom-6 left-0 right-0">
         <ChatInput disabled={!hasActiveChat || aiPending} onSend={handleSendMessage} />
       </div>
     </div>

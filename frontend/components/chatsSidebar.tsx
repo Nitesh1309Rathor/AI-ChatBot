@@ -3,25 +3,31 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import AnimatedChatTitle from "./AnimatedTitle";
+import { Spinner } from "./ui/spinner";
 
 type ChatsSidebarProps = {
   chats?: ChatSession[];
   activeChatId: string | null;
   onSelectChat: (id: string) => void;
   onCreate: () => void;
+  createLoading: boolean;
 };
 
-function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate }: ChatsSidebarProps) {
+function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate, createLoading }: ChatsSidebarProps) {
   return (
-    <div className="h-full py-4 flex flex-col">
-      <Button variant="outline" className="mb-4 justify-start" onClick={onCreate}>
-        + New chat
+    <div className="h-full py-4 flex flex-col text-[18px]">
+      <Button
+        variant="outline"
+        className={cn("mb-8 py-6 text-[18px]", createLoading ? "justify-center" : "justify-start", "cursor-pointer")}
+        onClick={onCreate}
+      >
+        {createLoading ? <Spinner /> : "+ New chat"}
       </Button>
 
       {/* Chat list */}
       <ScrollArea className="flex-1">
         {chats.length === 0 ? (
-          <p className="px-1 text-sm text-muted-foreground">No conversations yet</p>
+          <p className="px-1 text-[18px] text-muted-foreground">No conversations yet</p>
         ) : (
           <div className="space-y-1">
             {chats.map((chat) => {
@@ -34,7 +40,7 @@ function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate }: Chat
                   onClick={() => onSelectChat(chat.id)}
                   className={cn(
                     "w-full rounded-md px-3 py-2 text-left transition-colors",
-                    "hover:bg-muted/70",
+                    "hover:bg-muted/70 cursor-pointer",
                     isActive ? "bg-muted font-semibold text-foreground" : "text-muted-foreground",
                   )}
                 >
