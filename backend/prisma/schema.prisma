@@ -32,7 +32,7 @@ model ChatSession {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
 
-  @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Message {
@@ -45,7 +45,7 @@ model Message {
 
   chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 
-  @@index([chatSessionId])
+  @@index([chatSessionId, createdAt])
 }
 
 enum MessageRole {
