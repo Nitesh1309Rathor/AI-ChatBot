@@ -17,10 +17,9 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     },
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && endpoint !== "/api/auth/login") {
     LOCAL_STORAGE.removeToken();
     window.location.href = "/login";
-    return Promise.reject("Unauthorized");
   }
 
   if (!response.ok) {
