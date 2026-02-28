@@ -19,6 +19,7 @@ model User {
   password     String
   createdAt    DateTime      @default(now())
   name         String?
+  refreshToken  String?
 
   chatSessions ChatSession[]
 }

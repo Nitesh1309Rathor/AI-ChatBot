@@ -1,25 +1,18 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../utils/jwt.js";
-import logger from "../utils/logger.js";
-import { LOG } from "../constants/log.messages.js";
+import { verifyAccessToken } from "../utils/jwt.js";
 
-export function requireAuth(req: Request, _res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies.accessToken;
 
-  if (!authHeader) {
-    logger.warn(LOG.AUTH_MISSING_TOKEN);
-    throw new Error("Unauthorized");
+  if (!token) {
+    return res.sendStatus(401);
   }
 
-  const [type, token] = authHeader.split(" ");
-
-  if (type !== "Bearer" || !token) {
-    throw new Error("Unauthorized");
+  try {
+    const payload = verifyAccessToken(token);
+    req.userId = payload.userId;
+    next();
+  } catch {
+    return res.sendStatus(401);
   }
-
-  const payload = verifyToken(token);
-
-  req.userId = payload.userId;
-
-  next();
 }

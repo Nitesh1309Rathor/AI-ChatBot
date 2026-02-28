@@ -1,3 +1,9 @@
 export function generateChatTitle(content: string) {
-  return content.trim().split(/\s+/).slice(0, 6).join(" ") + "...";
+  const trimmed = content.trim();
+
+  if (trimmed.length <= 20) {
+    return trimmed;
+  }
+
+  return trimmed.slice(0, 20) + "...";
 }

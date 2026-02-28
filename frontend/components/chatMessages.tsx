@@ -13,9 +13,10 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
 
   useEffect(() => {
     if (!shouldAutoScrollRef.current) return;
-    const last = messages[messages.length - 1];
-    if (!last || last.role !== "ASSISTANT") return;
-    bottomRef.current?.scrollIntoView({ behavior: "auto" });
+
+    bottomRef.current?.scrollIntoView({
+      behavior: "auto",
+    });
   }, [messages]);
 
   useEffect(() => {
@@ -30,9 +31,15 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
     const el = containerRef.current;
     if (!el) return;
 
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
 
-    shouldAutoScrollRef.current = isNearBottom;
+    // If user is more than 150px away from bottom,
+    // disable auto scroll
+    if (distanceFromBottom > 150) {
+      shouldAutoScrollRef.current = false;
+    } else {
+      shouldAutoScrollRef.current = true;
+    }
 
     if (el.scrollTop === 0 && hasMore && !loading) {
       onLoadMore();
@@ -50,8 +57,8 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
               max-w-[75%] w-fit
               px-5 py-1
               rounded-2xl
-              text-[18px] leading-10
-              wrap-break-words break-all
+              text-[18px] leading-7
+              break-words whitespace-pre-wrap
               transition-all
               ${
                 msg.role === "USER" ? "bg-linear-to-r from-gray-600 to-gray-700 text-white shadow-lg" : "bg-card text-foreground shadow-sm border border-border"
@@ -73,7 +80,7 @@ export default function ChatMessages({ messages, hasMore, loading, onLoadMore, o
                     const isInline = !className;
 
                     if (isInline) {
-                      return <code className="bg-muted px-1 py-0.5 rounded text-sm">{children}</code>;
+                      return <code className="bg-muted px-1 py-0.5 rounded text-sm break-all whitespace-pre-wrap max-w-full inline-block">{children}</code>;
                     }
 
                     return (

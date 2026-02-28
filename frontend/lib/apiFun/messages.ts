@@ -1,6 +1,5 @@
 import { Message, PaginatedMessagesResponse } from "@/constants/types";
 import { apiFetch } from "../api";
-import { LOCAL_STORAGE } from "../auth.storage";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -36,13 +35,11 @@ export async function streamMessage({
   onError: (err: unknown) => void;
 }) {
   try {
-    const token = LOCAL_STORAGE.getToken();
-
     const res = await fetch(`${API_BASE_URL}/api/chats/${chatSessionId}/messages/stream`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ content }),
     });

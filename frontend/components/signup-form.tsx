@@ -32,9 +32,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     try {
       setServerError(null);
 
-      const response = await register(data.username, data.email, data.password);
-
-      LOCAL_STORAGE.setToken(response.token);
+      await register(data.username, data.email, data.password);
       router.push("/login");
     } catch (err: any) {
       const message = err?.response?.data?.message || err?.message || "Registration failed";

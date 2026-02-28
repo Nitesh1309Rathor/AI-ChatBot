@@ -2,6 +2,9 @@ export const ROUTES = {
   AUTH_ROUTE: {
     Register: "/register",
     Login: "/login",
+    Refresh: "/refresh",
+    Logout: "/logout",
+    Me: "/me",
   },
 
   CHAT: {
