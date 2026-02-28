@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { ChatService } from "../services/chat.service";
-import { SUCCESS } from "../constants/success.messages";
+import { ChatService } from "../services/chat.service.js";
+import { SUCCESS } from "../constants/success.messages.js";
 
 export const ChatController = {
   async createChat(req: Request, res: Response, next: NextFunction) {

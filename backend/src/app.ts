@@ -1,9 +1,9 @@
 import express, { Application } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import routes from "./routes/index";
-import healthRoutes from "./routes/health.route";
-import { errorMiddleware } from "./middlewares/error.middleware";
+import routes from "./routes/index.js";
+import healthRoutes from "./routes/health.route.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();

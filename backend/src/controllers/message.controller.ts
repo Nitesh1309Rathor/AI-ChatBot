@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { MessageService } from "../services/message.service";
-import { SUCCESS } from "../constants/success.messages";
+import { MessageService } from "../services/message.service.js";
+import { SUCCESS } from "../constants/success.messages.js";
 
 export const MessageController = {
   async getMessages(req: Request, res: Response, next: NextFunction) {
