@@ -1,26 +1,32 @@
 "use client";
 
 import { Spinner } from "@/components/ui/spinner";
-import { isAuthenticated } from "@/lib/auth.guard";
+import { apiFetch } from "@/lib/api";
+import { ChatApi } from "@/lib/apiFun/chat";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const [authenticate, setAuthenticate] = useState(false);
   const [checking, setChecking] = useState(true);
   const router = useRouter();
-  useEffect(() => {
-    if (isAuthenticated()) {
-      router.replace("/chats");
-    } else {
-      setAuthenticate(true);
-    }
-    setChecking(false);
-  }, []);
 
-  if (!authenticate) {
-    return null;
-  }
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        // Try calling protected route
+        await apiFetch("/api/auth/me");
+
+        // If success → user is authenticated
+        router.replace("/chats");
+      } catch {
+        // Not authenticated → stay on login/register
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    checkAuth();
+  }, [router]);
 
   if (checking) {
     return (

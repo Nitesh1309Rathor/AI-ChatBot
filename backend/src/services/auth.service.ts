@@ -2,7 +2,7 @@ import { ERROR } from "../constants/error.messages";
 import { LOG } from "../constants/log.messages";
 import { AuthDao } from "../repo/auth.repo";
 import { comparePassword, hashPassword } from "../utils/hash";
-import { signToken } from "../utils/jwt";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import logger from "../utils/logger";
 
 export const AuthService = {
@@ -19,10 +19,12 @@ export const AuthService = {
     const user = await AuthDao.createUser(name, email, hashedPassword);
 
     logger.info(LOG.AUTH_REGISTER_SUCCESS);
+    const accessToken = signAccessToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id });
 
-    return {
-      token: signToken({ userId: user.id }),
-    };
+    await AuthDao.updateRefreshToken(user.id, refreshToken);
+
+    return { accessToken, refreshToken };
   },
 
   async login(email: string, password: string) {
@@ -41,9 +43,37 @@ export const AuthService = {
     }
 
     logger.info(LOG.AUTH_LOGIN_SUCCESS);
+    const accessToken = signAccessToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id });
 
-    return {
-      token: signToken({ userId: user.id }),
-    };
+    await AuthDao.updateRefreshToken(user.id, refreshToken);
+
+    return { accessToken, refreshToken };
+  },
+
+  // Refreshes the token amd verifies.
+  async refresh(refreshToken: string) {
+    if (!refreshToken) {
+      throw new Error(ERROR.UNAUTHORIZED);
+    }
+
+    const decoded = verifyRefreshToken(refreshToken);
+
+    const user = await AuthDao.findById(decoded.userId);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      throw new Error(ERROR.UNAUTHORIZED);
+    }
+
+    const newAccessToken = signAccessToken({
+      userId: user.id,
+    });
+
+    return { accessToken: newAccessToken };
+  },
+
+  async logout(userId: string) {
+    await AuthDao.updateRefreshToken(userId, null);
+    logger.info(LOG.AUTH_LOGOUT_SUCCESS);
   },
 };

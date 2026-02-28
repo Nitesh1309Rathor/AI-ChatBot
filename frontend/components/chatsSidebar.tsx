@@ -14,6 +14,10 @@ type ChatsSidebarProps = {
 };
 
 function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate, createLoading }: ChatsSidebarProps) {
+  const truncateTitle = (title: string, maxLength = 30) => {
+    if (!title) return "New conversation";
+    return title.length > maxLength ? title.slice(0, maxLength) + "..." : title;
+  };
   return (
     <div className="h-full py-4 flex flex-col text-[18px]">
       <Button
@@ -45,7 +49,7 @@ function ChatsSidebar({ chats = [], activeChatId, onSelectChat, onCreate, create
                   )}
                 >
                   <span className="block truncate">
-                    <AnimatedChatTitle text={chat.title ?? "New conversation"} animate={shouldAnimate} />
+                    <AnimatedChatTitle text={truncateTitle(chat.title ?? "New conversation")} animate={shouldAnimate} />
                   </span>
                 </button>
               );

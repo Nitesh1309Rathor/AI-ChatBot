@@ -2,16 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import type { ChatSession } from "@/constants/types";
 import ChatsSidebar from "@/components/chatsSidebar";
 import { ThemeToggle } from "@/components/theme.toggle";
 import ChatMainPanel from "@/components/chatMainPanel";
 import { ChatApi } from "@/lib/apiFun/chat";
 import { useChats } from "@/context/ChatContext";
 import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth.guard";
 import { Button } from "@/components/ui/button";
-import { LOCAL_STORAGE } from "@/lib/auth.storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Menu } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function ChatsPage() {
   const router = useRouter();
@@ -35,15 +33,13 @@ export default function ChatsPage() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      router.replace("/login");
-      return;
-    }
-
     async function loadChats() {
       try {
         const chats = await ChatApi.getChats();
         setChats(chats);
+      } catch (err) {
+        // If unauthorized → redirect
+        router.replace("/login");
       } finally {
         setPageLoading(false);
       }
@@ -64,8 +60,8 @@ export default function ChatsPage() {
     }
   }
 
-  function handleLogout() {
-    LOCAL_STORAGE.removeToken();
+  async function handleLogout() {
+    await apiFetch("/api/auth/logout", { method: "POST" });
     router.replace("/login");
   }
 

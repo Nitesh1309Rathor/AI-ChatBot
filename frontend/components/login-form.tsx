@@ -7,7 +7,6 @@ import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from 
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { login } from "@/lib/apiFun/auth";
-import { LOCAL_STORAGE } from "@/lib/auth.storage";
 import { useRouter } from "next/navigation";
 import { Spinner } from "./ui/spinner";
 import { useForm } from "react-hook-form";
@@ -32,15 +31,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setServerError(null);
 
     try {
-      const response = await login(data.email, data.password);
+      await login(data.email, data.password);
 
-      const token = response?.data?.token;
-
-      if (!token) {
-        throw new Error("Invalid login response");
-      }
-
-      LOCAL_STORAGE.setToken(token);
       router.push("/chats");
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
