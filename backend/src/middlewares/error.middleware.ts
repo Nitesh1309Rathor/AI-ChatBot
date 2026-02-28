@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ERROR } from "../constants/error.messages.js";
-import logger from "../utils/logger.js";
+import { ERROR } from "../constants/error.messages";
+import logger from "../utils/logger";
 
 export function errorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction) {
   logger.error(err.message);

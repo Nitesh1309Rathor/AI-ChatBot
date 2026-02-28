@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { ROUTES } from "../routes/routes.js";
-import { requireAuth } from "../middlewares/requireAuth.js";
-import { ChatController } from "../controllers/chat.controller.js";
+import { ROUTES } from "../routes/routes";
+import { requireAuth } from "../middlewares/requireAuth";
+import { ChatController } from "../controllers/chat.controller";
 
 const router = Router();
 router.post(ROUTES.CHAT.CreateChat, requireAuth, ChatController.createChat);

@@ -1,5 +1,5 @@
-import { MessageRole } from "../../generated/prisma/enums.js";
-import { prisma } from "../lib/prisma.js";
+import { MessageRole } from "../../generated/prisma/enums";
+import { prisma } from "../lib/prisma";
 
 export const MessageDao = {
   async createMessage(data: { chatSessionId: string; role: MessageRole; content: string; clientId?: string }) {

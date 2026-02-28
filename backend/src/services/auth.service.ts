@@ -1,9 +1,9 @@
-import { ERROR } from "../constants/error.messages.js";
-import { LOG } from "../constants/log.messages.js";
-import { AuthDao } from "../repo/auth.repo.js";
-import { comparePassword, hashPassword } from "../utils/hash.js";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
-import logger from "../utils/logger.js";
+import { ERROR } from "../constants/error.messages";
+import { LOG } from "../constants/log.messages";
+import { AuthDao } from "../repo/auth.repo";
+import { comparePassword, hashPassword } from "../utils/hash";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
+import logger from "../utils/logger";
 
 export const AuthService = {
   async register(name: string, email: string, password: string) {

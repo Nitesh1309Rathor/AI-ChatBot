@@ -1,7 +1,7 @@
 import { Router } from "express";
-import authHandler from "../handlers/auth.handler.js";
-import chatHandler from "../handlers/chat.handler.js";
-import messageHandler from "../handlers/message.handler.js";
+import authHandler from "../handlers/auth.handler";
+import chatHandler from "../handlers/chat.handler";
+import messageHandler from "../handlers/message.handler";
 
 const router = Router();
 router.use("/auth", authHandler);

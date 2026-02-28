@@ -1,6 +1,6 @@
-import { ChatDao } from "../repo/chat.repo.js";
-import logger from "../utils/logger.js";
-import { LOG } from "../constants/log.messages.js";
+import { ChatDao } from "../repo/chat.repo";
+import logger from "../utils/logger";
+import { LOG } from "../constants/log.messages";
 
 export const ChatService = {
   async createChat(userId: string) {
