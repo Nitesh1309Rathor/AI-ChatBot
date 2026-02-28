@@ -33,7 +33,7 @@ function ChatMainPanel({ activeChatId, createLoading }: ChatMainPanelProps) {
     if (!activeChatId) return;
 
     setHistoryMessages([]);
-    setLiveMessages([]); // always reset live messages
+    setLiveMessages([]);
     setCursor(null);
     setHasMore(true);
 
@@ -74,8 +74,8 @@ function ChatMainPanel({ activeChatId, createLoading }: ChatMainPanelProps) {
     const isFirstMsg = historyMessages.length == 0 && liveMessages.length == 0;
 
     if (isFirstMsg) {
-      const title = generateChatTitle(content);
-      updateChatTitle(activeChatId, title);
+      // const title = generateChatTitle(content);
+      updateChatTitle(activeChatId, content);
     }
 
     const clientId = crypto.randomUUID();
