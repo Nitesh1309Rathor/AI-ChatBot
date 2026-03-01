@@ -13,9 +13,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     async function checkAuth() {
       try {
         // Try calling protected route
-        // await apiFetch("/api/auth/me");
-        // // If success → user is authenticated
-        // router.replace("/chats");
+        await apiFetch("/api/auth/me");
+        // If success → user is authenticated
+        router.replace("/chats");
       } catch {
         // Not authenticated → stay on login/register
       } finally {
