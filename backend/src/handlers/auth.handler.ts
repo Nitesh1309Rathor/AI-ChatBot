@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { AuthController } from "../controllers/auth.controller";
-import { ROUTES } from "../routes/routes";
-import { validate } from "../middlewares/zodValidator";
-import { loginSchema, registerSchema } from "../validators/auth.schema";
-import { requireAuth } from "../middlewares/requireAuth";
+import { AuthController } from "../controllers/auth.controller.js";
+import { ROUTES } from "../routes/routes.js";
+import { validate } from "../middlewares/zodValidator.js";
+import { loginSchema, registerSchema } from "../validators/auth.schema.js";
+import { requireAuth } from "../middlewares/requireAuth.js";
 
 const router = Router();
 

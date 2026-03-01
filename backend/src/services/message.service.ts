@@ -1,10 +1,10 @@
-import { ChatDao } from "../repo/chat.repo";
-import { MessageDao } from "../repo/message.repo";
-import logger from "../utils/logger";
-import { LOG } from "../constants/log.messages";
-import { ERROR } from "../constants/error.messages";
-import { Response } from "express";
-import { streamAIResponse } from "../utils/ai";
+import { ChatDao } from "../repo/chat.repo.js";
+import { MessageDao } from "../repo/message.repo.js";
+import logger from "../utils/logger.js";
+import { LOG } from "../constants/log.messages.js";
+import { ERROR } from "../constants/error.messages.js";
+import type { Response } from "express";
+import { streamAIResponse } from "../utils/ai.js";
 
 export const MessageService = {
   async getMessages(userId: string, chatSessionId: string, limit = 20, cursor?: string) {
