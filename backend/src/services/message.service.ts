@@ -25,18 +25,13 @@ export const MessageService = {
     const hasMore = messages.length > limit;
     const slicedMessages = hasMore ? messages.slice(0, limit) : messages;
 
-    let nextCursor: string | null = null;
-
-    if (hasMore && slicedMessages.length > 0) {
-      const lastMessage = slicedMessages[slicedMessages.length - 1];
-      nextCursor = lastMessage.id;
-    }
+    const lastMessage = hasMore ? slicedMessages.at(-1) : undefined;
 
     logger.info(`${LOG.MESSAGES_FETCH_SUCCESS} userId=${userId} chatId=${chatSessionId} count=${slicedMessages.length}`);
 
     return {
       messages: slicedMessages,
-      nextCursor,
+      nextCursor: lastMessage?.id ?? null,
       hasMore,
     };
   },
