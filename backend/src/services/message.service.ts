@@ -25,7 +25,12 @@ export const MessageService = {
     const hasMore = messages.length > limit;
     const slicedMessages = hasMore ? messages.slice(0, limit) : messages;
 
-    const nextCursor = hasMore ? slicedMessages[slicedMessages.length - 1].id : null;
+    let nextCursor: string | null = null;
+
+    if (hasMore && slicedMessages.length > 0) {
+      const lastMessage = slicedMessages[slicedMessages.length - 1];
+      nextCursor = lastMessage.id;
+    }
 
     logger.info(`${LOG.MESSAGES_FETCH_SUCCESS} userId=${userId} chatId=${chatSessionId} count=${slicedMessages.length}`);
 
