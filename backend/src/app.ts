@@ -12,6 +12,7 @@ dotenv.config();
 const app: Application = express();
 
 // middlewares:
+app.set("trust proxy", 1);
 app.use(cors({ origin: process.env.FRONTEND_URL || "https://ai-chat-bot-nine-black.vercel.app", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
