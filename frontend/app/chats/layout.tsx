@@ -7,9 +7,9 @@ export default async function ChatsLayout({ children }: { children: React.ReactN
   const token = cookieStore.get("accessToken");
   console.log(token);
 
-  if (!token) {
-    redirect("/login");
-  }
+  // if (!token) {
+  //   redirect("/login");
+  // }
 
   return <ChatsClientLayout>{children}</ChatsClientLayout>;
 }
