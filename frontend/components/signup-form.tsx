@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Spinner } from "./ui/spinner";
 import { register } from "@/lib/apiFun/auth";
-import { LOCAL_STORAGE } from "@/lib/auth.storage";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
