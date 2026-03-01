@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         await apiFetch("/api/auth/me");
 
         // If success → user is authenticated
-        router.replace("/chats");
+        // router.replace("/chats");
       } catch {
         // Not authenticated → stay on login/register
       } finally {
