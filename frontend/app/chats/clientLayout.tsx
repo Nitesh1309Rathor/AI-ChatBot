@@ -78,7 +78,7 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen flex overflow-hidden bg-background">
       {logoutLoading && (
-        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-100 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <Spinner />
         </div>
       )}
