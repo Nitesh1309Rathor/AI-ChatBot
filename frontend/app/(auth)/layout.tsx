@@ -6,27 +6,24 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const [checking, setChecking] = useState(true);
   const router = useRouter();
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     async function checkAuth() {
       try {
-        // Try calling protected route
         await apiFetch("/api/auth/me");
-        // If success → user is authenticated
         router.replace("/chats");
       } catch {
-        // Not authenticated → stay on login/register
-      } finally {
-        setChecking(false);
+        setCheckingAuth(false);
       }
     }
 
     checkAuth();
   }, [router]);
 
-  if (checking) {
+  if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner />
