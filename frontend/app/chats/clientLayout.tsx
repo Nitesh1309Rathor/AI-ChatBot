@@ -33,6 +33,29 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
 
   const { chats, setChats } = useChats();
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        await apiFetch("/api/auth/me");
+        setCheckingAuth(false);
+      } catch {
+        router.replace("/login");
+      }
+    }
+
+    checkAuth();
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
   useEffect(() => {
     async function loadChats() {
       try {
