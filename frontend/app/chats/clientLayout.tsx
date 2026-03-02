@@ -48,14 +48,6 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
     checkAuth();
   }, [router]);
 
-  if (checkingAuth) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
-
   useEffect(() => {
     async function loadChats() {
       try {
@@ -90,7 +82,7 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
     }
   }
 
-  if (pageLoading) {
+  if (checkingAuth || pageLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Spinner />
