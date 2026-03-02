@@ -85,8 +85,17 @@ export const AuthController = {
     try {
       await AuthService.logout(req.userId);
 
-      res.clearCookie("accessToken", { path: "/" });
-      res.clearCookie("refreshToken", { path: "/" });
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
 
       res.status(200).json({ message: "Logged out" });
     } catch (err) {
